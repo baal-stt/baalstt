@@ -1,0 +1,5 @@
+# runtime state (payments, keys)
+keys.json
+payments.json
+__pycache__/
+*.pyc
