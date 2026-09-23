@@ -2,7 +2,7 @@
 
 Audio rein → Text raus. Powered by **Deepgram nova-2**. Self-hosted, crypto-paid, no signup.
 
-**Live:** <https://chrispc.tailb3821a.ts.net/>
+**Live:** <https://baalstt.tailb3821a.ts.net/>
 
 ## API
 
@@ -22,17 +22,17 @@ Models: `nova-2`, `whisper-large-v3`, `whisper-large-v3-turbo`.
   real chain (Blockstream / Solana-RPC) and returns a key that lifts the cap:
 
 ```bash
-curl -F "file=@meeting.wav" "https://chrispc.tailb3821a.ts.net/transcribe?model=nova-2"
+curl -F "file=@meeting.wav" "https://baalstt.tailb3821a.ts.net/transcribe?model=nova-2"
 
 # after paying:
-curl -X POST https://chrispc.tailb3821a.ts.net/verify \
+curl -X POST https://baalstt.tailb3821a.ts.net/verify \
      -H "Content-Type: application/json" \
      -d '{"txid": "…", "chain": "auto"}'
 # → {"ok": true, "api_key": "baal_…"}
 
 # paid usage:
 curl -F "file=@big.wav" -H "X-BaalSTT-Key: baal_…" \
-     "https://chrispc.tailb3821a.ts.net/transcribe"
+     "https://baalstt.tailb3821a.ts.net/transcribe"
 ```
 
 ## Security
