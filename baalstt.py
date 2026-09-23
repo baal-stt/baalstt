@@ -21,7 +21,6 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 
 BASE = Path(os.environ.get("BAALSTT_STATE_DIR", str(Path(__file__).parent)))
@@ -42,7 +41,6 @@ AUDIO_EXT = {".mp3", ".wav", ".m4a", ".ogg", ".oga", ".webm", ".flac", ".mp4", "
 MODELS = {"nova-2", "whisper-large-v3", "whisper-large-v3-turbo"}
 
 STATE = {"counts": {}, "global": {"day": "", "n": 0}}  # ip -> {...}; global daily cap
-api_key_header = APIKeyHeader(name="X-BaalSTT-Key", auto_error=False)
 
 PAYMENTS_F = BASE / "payments.json"   # txid -> {chain, amount, ts, ip}
 KEYS_F = BASE / "keys.json"           # api_key -> {created, txid, ip}
@@ -289,7 +287,7 @@ async def transcribe(req: Request, model: str = "nova-2", file: UploadFile | Non
     if model not in MODELS:
         raise HTTPException(status_code=400, detail=f"model must be one of {sorted(MODELS)}")
     ip = client_ip(req)
-    key = api_key_header(req) or ""
+    key = (req.headers.get("x-baalstt-key") or "").strip()
     # paid = key exists AND not expired (72 h)
     paid = False
     if key:
@@ -306,6 +304,9 @@ async def transcribe(req: Request, model: str = "nova-2", file: UploadFile | Non
         if ext and ext not in AUDIO_EXT:
             raise HTTPException(status_code=415, detail=f"unsupported type {ext}")
         return deepgram_file(data, model, file.content_type or "application/octet-stream")
+    if "multipart/form-data" in ct:
+        # multipart ohne Datei: Body bereits von File-Parsing konsumiert
+        raise HTTPException(status_code=400, detail="send multipart file or JSON {url}")
     body = await req.body()
     try:
         j = json.loads(body or b"{}")
